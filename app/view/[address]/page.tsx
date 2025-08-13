@@ -22,12 +22,10 @@ export default function ViewAddressPage() {
     `Zory by ${address.slice(0, 6)}...${address.slice(-4)}`;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-4 pt-20">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 pt-20">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            {title}
-          </h1>
+          <h1 className="text-2xl font-bold text-white mb-2">{title}</h1>
         </div>
 
         <ViewZory

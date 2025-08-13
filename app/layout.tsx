@@ -99,7 +99,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-background">
+      <body className="bg-black">
         <Providers>
           <Analytics />
           <MiniKitInitializer />
