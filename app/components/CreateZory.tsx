@@ -61,7 +61,7 @@ export default function CreateZory({
   const [photo, setPhoto] = useState<string | null>(null);
   const [restartCamera, setRestartCamera] = useState(false);
   const [isInCameraMode, setIsInCameraMode] = useState(false);
-  const { address, status, chainId } = useAccount();
+  const { address, status, chainId, connector } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const [operationStatus, setOperationStatus] =
@@ -496,6 +496,24 @@ export default function CreateZory({
               {getButtonState().text}
             </button>
           </div>
+
+          {/* Farcaster wallet warning */}
+          {connector?.id === "xyz.farcaster.MiniAppWallet" && (
+            <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
+              <p className="text-yellow-200 text-sm text-center">
+                ⚠️ There is currently a known issue with coin creation using
+                Farcaster wallets.{" "}
+                <a
+                  href="https://farcaster.xyz/azf/0xade0b849"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-yellow-100 underline hover:text-white transition-colors"
+                >
+                  Learn more
+                </a>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );

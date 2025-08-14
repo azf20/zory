@@ -81,7 +81,7 @@ export function Header() {
                     Recent
                   </span>
                   <div className="flex items-center space-x-1">
-                    {createdZories.slice(0, 5).map((zory) => (
+                    {createdZories.slice(0, 10).map((zory) => (
                       <Link
                         key={zory.coinAddress}
                         href={`/view/${zory.callerAddress}`}
