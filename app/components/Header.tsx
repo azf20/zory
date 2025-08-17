@@ -38,10 +38,19 @@ export function Header() {
                   size={40}
                   theme="dark"
                 />
-                <span className="ml-3 text-white font-semibold text-lg group-hover:text-white/80 transition-colors">
+                <span className="hidden md:block ml-3 text-white font-semibold text-lg group-hover:text-white/80 transition-colors">
                   Zory
                 </span>
               </Link>
+
+              {/* Mobile: Plus Button */}
+              <div className="md:hidden">
+                <Link href="/" title="Add to your Zory" className="group">
+                  <div className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 border border-white/30 transition-all duration-200 group-hover:scale-110">
+                    <PlusIcon className="w-5 h-5" />
+                  </div>
+                </Link>
+              </div>
 
               {/* Info Icon */}
               <Link

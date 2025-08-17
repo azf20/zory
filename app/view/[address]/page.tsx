@@ -33,11 +33,12 @@ export default function ViewAddressPage() {
           userCoinData={userCoinData}
           isLoadingUserCoin={isLoadingUserCoin}
           showMarketData={true}
-          onCreateClick={() => {
-            if (account.address) {
-              router.push(`/?create=true`);
-            }
-          }}
+          onCreateClick={
+            account.address &&
+            account.address.toLowerCase() === address.toLowerCase()
+              ? () => router.push(`/?create=true`)
+              : undefined
+          }
         />
       </div>
     </div>

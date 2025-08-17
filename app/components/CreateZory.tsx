@@ -6,16 +6,21 @@ import {
   useWalletClient,
   usePublicClient,
   useSwitchChain,
+  useSendCalls,
+  useGasPrice,
+  useBalance,
 } from "wagmi";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
 import { base } from "wagmi/chains";
-import { Address } from "viem";
+import { Address, TransactionReceipt } from "viem";
 import toast from "react-hot-toast";
 import {
   createCoin,
   updateCoinURI,
-  DeployCurrency,
+  CreateConstants,
   ValidMetadataURI,
+  createCoinCall,
+  getCoinCreateFromLogs,
 } from "@zoralabs/coins-sdk";
 import { useEnsNameMainnet } from "@/lib/hooks/useEnsName";
 import { UserCoinData } from "@/lib/hooks/useUserCoin";
@@ -67,8 +72,25 @@ export default function CreateZory({
   const [operationStatus, setOperationStatus] =
     useState<OperationStatus>("idle");
   const { switchChain } = useSwitchChain();
+  const { sendCallsAsync: sendCalls } = useSendCalls();
+  const { data: gasPrice } = useGasPrice();
+  const { data: balance } = useBalance({
+    address: address as `0x${string}`,
+  });
+
+  // Different gas requirements for create vs update
+  const createGasAmount = BigInt(3_000_000);
+  const updateGasAmount = BigInt(75_000);
+
+  const requiredBalanceForCreate = gasPrice
+    ? gasPrice * createGasAmount
+    : BigInt(0);
+  const requiredBalanceForUpdate = gasPrice
+    ? gasPrice * updateGasAmount
+    : BigInt(0);
 
   const isBase = chainId === base.id;
+  const isFarcasterWallet = connector?.id === "xyz.farcaster.MiniAppWallet";
 
   // Use custom hook for ENS resolution on mainnet
   const { data: ensName } = useEnsNameMainnet({
@@ -176,43 +198,81 @@ export default function CreateZory({
       setOperationStatus("creating");
 
       const coinParams = {
-        uri: metadata.uri as ValidMetadataURI,
+        creator: address as `0x${string}`,
         name: metadata.name,
         symbol: metadata.symbol,
+        metadata: {
+          type: "RAW_URI" as const,
+          uri: metadata.uri,
+        },
         description: metadata.description,
         payoutRecipient: address as `0x${string}`,
+        startingMarketCap: CreateConstants.StartingMarketCaps.LOW,
         platformReferrer: process.env
           .NEXT_PUBLIC_PLATFORM_REFERRER as `0x${string}`,
-        currency: DeployCurrency.ZORA,
+        currency: CreateConstants.ContentCoinCurrencies.ZORA,
+        chainId: base.id,
       };
 
-      const coinResult = await createCoin(
-        coinParams,
-        walletClient,
-        publicClient,
-      );
-      console.log("Coin created:", coinResult);
+      if (isFarcasterWallet) {
+        const coinCall = await createCoinCall(coinParams);
+        await publicClient.call({
+          ...coinCall,
+          account: walletClient.account,
+        });
 
-      // Wait for transaction to be confirmed
-      if (coinResult.hash) {
+        const sendCallsResult = await sendCalls({
+          calls: coinCall,
+        });
+        console.log("Coin created:", sendCallsResult);
+        setOperationStatus("confirming");
+        const callsStatus = await walletClient.waitForCallsStatus({
+          id: sendCallsResult.id,
+        });
+        console.log("Calls status:", callsStatus);
+        if (
+          callsStatus.receipts &&
+          callsStatus.receipts[0].status === "success"
+        ) {
+          const receipt = callsStatus.receipts[0] as TransactionReceipt;
+          const coinCreate = getCoinCreateFromLogs(receipt);
+          console.log("Coin create:", coinCreate);
+          if (!coinCreate) {
+            throw new Error("Coin creation failed");
+          }
+          handleOperationSuccess({
+            hash: receipt.transactionHash,
+            type: "creation",
+            tokenURI: metadata.uri,
+            coinAddress: coinCreate.coin,
+            metadata: metadata.json,
+          });
+        } else {
+          throw new Error("Coin creation failed");
+        }
+      } else {
+        const coinResult = await createCoin({
+          call: coinParams,
+          walletClient,
+          publicClient,
+        });
+        console.log("Coin created:", coinResult);
+
         setOperationStatus("confirming");
         await publicClient.waitForTransactionReceipt({
           hash: coinResult.hash,
         });
-        console.log("Transaction confirmed");
+
+        const coinAddressFromResult = coinResult.deployment?.coin;
+
+        handleOperationSuccess({
+          hash: coinResult.hash,
+          type: "creation",
+          tokenURI: metadata.uri,
+          coinAddress: coinAddressFromResult,
+          metadata: metadata.json,
+        });
       }
-
-      const coinAddressFromResult = coinResult.deployment?.coin;
-
-      handleOperationSuccess({
-        hash: coinResult.hash,
-        type: "creation",
-        tokenURI: metadata.uri,
-        coinAddress: coinAddressFromResult,
-        metadata: metadata.json,
-      });
-
-      // Show success toast
       toast.success("Zory created successfully! 🎉");
     } catch (error) {
       console.error("Error creating Zory:", error);
@@ -319,6 +379,24 @@ export default function CreateZory({
         action: () => switchChain({ chainId: 8453 }),
         isConnect: false,
         className: "bg-[#0052FF] text-white hover:bg-[#0052FF]/90",
+      };
+    }
+
+    // Check balance for create vs update operations
+    const isCreate = !userCoinData;
+    const requiredBalance = isCreate
+      ? requiredBalanceForCreate
+      : requiredBalanceForUpdate;
+    const hasInsufficientBalance =
+      balance && requiredBalance > 0 && balance.value < requiredBalance;
+
+    if (hasInsufficientBalance) {
+      return {
+        text: "Insufficient balance",
+        disabled: true,
+        action: null,
+        isConnect: false,
+        className: "bg-red-500 text-white cursor-not-allowed opacity-60",
       };
     }
 
@@ -496,24 +574,6 @@ export default function CreateZory({
               {getButtonState().text}
             </button>
           </div>
-
-          {/* Farcaster wallet warning */}
-          {connector?.id === "xyz.farcaster.MiniAppWallet" && (
-            <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
-              <p className="text-yellow-200 text-sm text-center">
-                ⚠️ There is currently a known issue with coin creation using
-                Farcaster wallets.{" "}
-                <a
-                  href="https://farcaster.xyz/azf/0xade0b849"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-yellow-100 underline hover:text-white transition-colors"
-                >
-                  Learn more
-                </a>
-              </p>
-            </div>
-          )}
         </div>
       </div>
     );
