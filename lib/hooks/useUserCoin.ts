@@ -9,6 +9,17 @@ import {
 import { base } from "viem/chains";
 import { INDEX_SUPPLY_EVENT_SIGNATURE } from "@/lib/abi/zoraFactory";
 
+// Tuple type describing the Index Supply row ordering used in our query
+export type IndexSupplyCoinRow = [
+  caller: string,
+  platformReferrer: string,
+  coin: string,
+  uri: string,
+  name: string,
+];
+
+export type IndexSupplyQueryResult = IndexSupplyCoinRow[];
+
 // ABI for the Zora coin contract to read tokenURI
 const coinABI = [
   {
@@ -91,7 +102,8 @@ export function useUserCoin({
       );
 
       const apiResult = await response.json();
-      const coinsResult = apiResult?.result?.[0].slice(1) || [];
+      const coinsResult = (apiResult?.result?.[0].slice(1) ||
+        []) as IndexSupplyQueryResult;
 
       if (coinsResult.length > 0) {
         const userCoin = coinsResult[0]; // Take the first (most recent) coin
@@ -162,12 +174,13 @@ export function useUserCoin({
   });
 
   // Combine all data into the final result
-  const isLoading =
+  const isLoading = Boolean(
     (!address && !coinAddressInput) ||
-    (address && tokenSupplyQuery.isLoading && !coinAddressInput) ||
-    (coinAddress && tokenURIQuery.isLoading && !tokenURIInput) ||
-    (tokenURI && metadataQuery.isLoading && !metadataInput) ||
-    (coinAddress && zoraDataQuery.isLoading);
+      (address && tokenSupplyQuery.isLoading && !coinAddressInput) ||
+      (coinAddress && tokenURIQuery.isLoading && !tokenURIInput) ||
+      (tokenURI && metadataQuery.isLoading && !metadataInput) ||
+      (coinAddress && zoraDataQuery.isLoading),
+  );
 
   const isError =
     tokenSupplyQuery.isError ||

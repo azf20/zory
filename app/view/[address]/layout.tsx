@@ -2,14 +2,19 @@ import type { Metadata } from "next";
 import { INDEX_SUPPLY_EVENT_SIGNATURE } from "@/lib/abi/zoraFactory";
 import { getCoin } from "@zoralabs/coins-sdk";
 import { base } from "viem/chains";
+import type {
+  IndexSupplyQueryResult,
+  IndexSupplyCoinRow,
+} from "@/lib/hooks/useUserCoin";
 
 export async function generateMetadata({
   params,
 }: {
-  params: { address: string };
+  params: Promise<{ address: string }>;
 }): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL;
-  const fallbackTitle = `Zory by ${params.address.slice(0, 6)}...${params.address.slice(-4)}`;
+  const { address } = await params;
+  const fallbackTitle = `Zory by ${address.slice(0, 6)}...${address.slice(-4)}`;
   const fallbackImage = process.env.NEXT_PUBLIC_APP_OG_IMAGE || "/zory.png";
   const platformReferrer = process.env.NEXT_PUBLIC_PLATFORM_REFERRER;
 
@@ -39,7 +44,7 @@ export async function generateMetadata({
             query: `select caller, platformReferrer, coin, uri, name
                  from coincreatedv4
                  where platformReferrer = ${platformReferrer}
-                 and caller = ${params.address}
+                 and caller = ${address}
                  order by block_num desc`,
           },
         ]),
@@ -49,7 +54,8 @@ export async function generateMetadata({
     );
 
     const apiResult = await indexResponse.json();
-    const coinsResult: any[] = apiResult?.result?.[0]?.slice(1) || [];
+    const coinsResult = (apiResult?.result?.[0]?.slice(1) ||
+      []) as IndexSupplyQueryResult;
 
     if (coinsResult.length === 0) {
       return {
@@ -66,11 +72,9 @@ export async function generateMetadata({
       };
     }
 
-    const userCoin = coinsResult[0];
+    const userCoin = coinsResult[0] as IndexSupplyCoinRow;
     const coinAddress: string = userCoin[2];
     const coinName: string | undefined = userCoin[4];
-
-    console.log("coinAddress", userCoin, params.address);
 
     // Fetch richer coin data from Zora
     let imageUrl = fallbackImage;

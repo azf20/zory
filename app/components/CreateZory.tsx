@@ -341,8 +341,9 @@ export default function CreateZory({
     const requiredBalance = isCreate
       ? requiredBalanceForCreate
       : requiredBalanceForUpdate;
-    const hasInsufficientBalance =
-      balance && requiredBalance > 0 && balance.value < requiredBalance;
+    const hasInsufficientBalance = Boolean(
+      balance && requiredBalance > 0 && balance.value < requiredBalance,
+    );
 
     if (hasInsufficientBalance) {
       return {
