@@ -6,26 +6,24 @@ import {
   useWalletClient,
   usePublicClient,
   useSwitchChain,
-  useSendCalls,
   useGasPrice,
   useBalance,
 } from "wagmi";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
 import { base } from "wagmi/chains";
-import { Address, TransactionReceipt } from "viem";
+import { Address } from "viem";
 import toast from "react-hot-toast";
 import {
   createCoin,
   updateCoinURI,
   CreateConstants,
   ValidMetadataURI,
-  createCoinCall,
-  getCoinCreateFromLogs,
 } from "@zoralabs/coins-sdk";
 import { useEnsNameMainnet } from "@/lib/hooks/useEnsName";
 import { UserCoinData } from "@/lib/hooks/useUserCoin";
 import CameraCapture from "./CameraCapture";
 import Image from "next/image";
+import { ConnectKitButton } from "connectkit";
 
 interface CreateZoryProps {
   onBackClick: () => void;
@@ -66,13 +64,12 @@ export default function CreateZory({
   const [photo, setPhoto] = useState<string | null>(null);
   const [restartCamera, setRestartCamera] = useState(false);
   const [isInCameraMode, setIsInCameraMode] = useState(false);
-  const { address, status, chainId, connector } = useAccount();
+  const { address, status, chainId } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const [operationStatus, setOperationStatus] =
     useState<OperationStatus>("idle");
   const { switchChain } = useSwitchChain();
-  const { sendCallsAsync: sendCalls } = useSendCalls();
   const { data: gasPrice } = useGasPrice();
   const { data: balance } = useBalance({
     address: address as `0x${string}`,
@@ -89,8 +86,14 @@ export default function CreateZory({
     ? gasPrice * updateGasAmount
     : BigInt(0);
 
+  // Centralized button styles to avoid duplication
+  const BUTTON_STYLES = {
+    primary: "bg-[#0052FF] text-white hover:bg-[#0052FF]/90",
+    disabled: "bg-gray-400 text-gray-200 cursor-not-allowed",
+    danger: "bg-red-500 text-white cursor-not-allowed opacity-60",
+  } as const;
+
   const isBase = chainId === base.id;
-  const isFarcasterWallet = connector?.id === "xyz.farcaster.MiniAppWallet";
 
   // Use custom hook for ENS resolution on mainnet
   const { data: ensName } = useEnsNameMainnet({
@@ -324,23 +327,12 @@ export default function CreateZory({
   ]);
 
   const getButtonState = useCallback(() => {
-    if (!status || status === "disconnected") {
-      return {
-        text: "Connect Wallet in Header",
-        disabled: true,
-        action: null,
-        isConnect: true,
-        className: "bg-gray-400 text-white cursor-not-allowed opacity-60",
-      };
-    }
-
     if (!isBase) {
       return {
         text: "Switch to Base",
         disabled: false,
         action: () => switchChain({ chainId: 8453 }),
-        isConnect: false,
-        className: "bg-[#0052FF] text-white hover:bg-[#0052FF]/90",
+        className: BUTTON_STYLES.primary,
       };
     }
 
@@ -357,8 +349,7 @@ export default function CreateZory({
         text: "Insufficient balance",
         disabled: true,
         action: null,
-        isConnect: false,
-        className: "bg-red-500 text-white cursor-not-allowed opacity-60",
+        className: BUTTON_STYLES.danger,
       };
     }
 
@@ -367,8 +358,7 @@ export default function CreateZory({
         text: "Uploading...",
         disabled: true,
         action: () => {},
-        isConnect: false,
-        className: "bg-gray-400 text-gray-200 cursor-not-allowed",
+        className: BUTTON_STYLES.disabled,
       };
     }
 
@@ -377,8 +367,7 @@ export default function CreateZory({
         text: "Creating Coin...",
         disabled: true,
         action: () => {},
-        isConnect: false,
-        className: "bg-gray-400 text-gray-200 cursor-not-allowed",
+        className: BUTTON_STYLES.disabled,
       };
     }
 
@@ -387,8 +376,7 @@ export default function CreateZory({
         text: "Updating Coin...",
         disabled: true,
         action: () => {},
-        isConnect: false,
-        className: "bg-gray-400 text-gray-200 cursor-not-allowed",
+        className: BUTTON_STYLES.disabled,
       };
     }
 
@@ -397,8 +385,7 @@ export default function CreateZory({
         text: "Confirming Transaction...",
         disabled: true,
         action: () => {},
-        isConnect: false,
-        className: "bg-gray-400 text-gray-200 cursor-not-allowed",
+        className: BUTTON_STYLES.disabled,
       };
     }
 
@@ -406,17 +393,18 @@ export default function CreateZory({
       text: userCoinData ? "Add to Zory" : "Create Zory",
       disabled: false,
       action: userCoinData ? handleUpdateZory : handleCreateZory,
-      isConnect: false,
-      className: "bg-[#0052FF] text-white hover:bg-[#0052FF]/90",
+      className: BUTTON_STYLES.primary,
     };
   }, [
-    status,
     isBase,
     operationStatus,
     userCoinData,
     switchChain,
     handleCreateZory,
     handleUpdateZory,
+    balance,
+    requiredBalanceForCreate,
+    requiredBalanceForUpdate,
   ]);
 
   // Show camera mode
@@ -528,13 +516,19 @@ export default function CreateZory({
             >
               Take Another
             </button>
-            <button
-              onClick={getButtonState().action ?? undefined}
-              disabled={getButtonState().disabled}
-              className={`rounded-full px-4 py-2 shadow-lg font-medium backdrop-blur-sm transition-all duration-200 ${getButtonState().className}`}
-            >
-              {getButtonState().text}
-            </button>
+            {!status || status === "disconnected" || status === "connecting" ? (
+              <div className="flex justify-center">
+                <ConnectKitButton />
+              </div>
+            ) : (
+              <button
+                onClick={getButtonState().action ?? undefined}
+                disabled={getButtonState().disabled}
+                className={`rounded-full px-4 py-2 shadow-lg font-medium backdrop-blur-sm transition-all duration-200 ${getButtonState().className}`}
+              >
+                {getButtonState().text}
+              </button>
+            )}
           </div>
         </div>
       </div>
