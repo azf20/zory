@@ -19,6 +19,7 @@ export function Header() {
   const { address } = useAccount();
   const { data: createdZories, isLoading } = useCreatedZories();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const zoryLimit = 10;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
@@ -90,7 +91,7 @@ export function Header() {
                     Recent
                   </span>
                   <div className="flex items-center space-x-1">
-                    {createdZories.slice(0, 10).map((zory) => (
+                    {createdZories.slice(0, zoryLimit).map((zory) => (
                       <Link
                         key={zory.coinAddress}
                         href={`/view/${zory.callerAddress}`}
@@ -106,9 +107,9 @@ export function Header() {
                         />
                       </Link>
                     ))}
-                    {createdZories.length > 5 && (
+                    {createdZories.length > zoryLimit && (
                       <span className="text-white/40 text-xs ml-1">
-                        +{createdZories.length - 5}
+                        +{createdZories.length - zoryLimit}
                       </span>
                     )}
                   </div>
