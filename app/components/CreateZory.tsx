@@ -213,66 +213,28 @@ export default function CreateZory({
         currency: CreateConstants.ContentCoinCurrencies.ZORA,
         chainId: base.id,
       };
+      const coinResult = await createCoin({
+        call: coinParams,
+        walletClient,
+        publicClient,
+      });
+      console.log("Coin created:", coinResult);
 
-      if (isFarcasterWallet) {
-        const coinCall = await createCoinCall(coinParams);
-        await publicClient.call({
-          ...coinCall,
-          account: walletClient.account,
-        });
+      setOperationStatus("confirming");
+      await publicClient.waitForTransactionReceipt({
+        hash: coinResult.hash,
+      });
 
-        const sendCallsResult = await sendCalls({
-          calls: coinCall,
-        });
-        console.log("Coin created:", sendCallsResult);
-        setOperationStatus("confirming");
-        const callsStatus = await walletClient.waitForCallsStatus({
-          id: sendCallsResult.id,
-        });
-        console.log("Calls status:", callsStatus);
-        if (
-          callsStatus.receipts &&
-          callsStatus.receipts[0].status === "success"
-        ) {
-          const receipt = callsStatus.receipts[0] as TransactionReceipt;
-          const coinCreate = getCoinCreateFromLogs(receipt);
-          console.log("Coin create:", coinCreate);
-          if (!coinCreate) {
-            throw new Error("Coin creation failed");
-          }
-          handleOperationSuccess({
-            hash: receipt.transactionHash,
-            type: "creation",
-            tokenURI: metadata.uri,
-            coinAddress: coinCreate.coin,
-            metadata: metadata.json,
-          });
-        } else {
-          throw new Error("Coin creation failed");
-        }
-      } else {
-        const coinResult = await createCoin({
-          call: coinParams,
-          walletClient,
-          publicClient,
-        });
-        console.log("Coin created:", coinResult);
+      const coinAddressFromResult = coinResult.deployment?.coin;
 
-        setOperationStatus("confirming");
-        await publicClient.waitForTransactionReceipt({
-          hash: coinResult.hash,
-        });
+      handleOperationSuccess({
+        hash: coinResult.hash,
+        type: "creation",
+        tokenURI: metadata.uri,
+        coinAddress: coinAddressFromResult,
+        metadata: metadata.json,
+      });
 
-        const coinAddressFromResult = coinResult.deployment?.coin;
-
-        handleOperationSuccess({
-          hash: coinResult.hash,
-          type: "creation",
-          tokenURI: metadata.uri,
-          coinAddress: coinAddressFromResult,
-          metadata: metadata.json,
-        });
-      }
       toast.success("Zory created successfully! 🎉");
     } catch (error) {
       console.error("Error creating Zory:", error);
