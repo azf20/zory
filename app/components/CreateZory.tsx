@@ -16,7 +16,7 @@ import toast from "react-hot-toast";
 import {
   createCoin,
   updateCoinURI,
-  CreateConstants,
+  DeployCurrency,
   ValidMetadataURI,
 } from "@zoralabs/coins-sdk";
 import { useEnsNameMainnet } from "@/lib/hooks/useEnsName";
@@ -204,23 +204,19 @@ export default function CreateZory({
         creator: address as `0x${string}`,
         name: metadata.name,
         symbol: metadata.symbol,
-        metadata: {
-          type: "RAW_URI" as const,
-          uri: metadata.uri,
-        },
+        uri: metadata.uri as ValidMetadataURI,
         description: metadata.description,
         payoutRecipient: address as `0x${string}`,
-        startingMarketCap: CreateConstants.StartingMarketCaps.LOW,
         platformReferrer: process.env
           .NEXT_PUBLIC_PLATFORM_REFERRER as `0x${string}`,
-        currency: CreateConstants.ContentCoinCurrencies.ZORA,
+        currency: DeployCurrency.ZORA,
         chainId: base.id,
       };
-      const coinResult = await createCoin({
-        call: coinParams,
+      const coinResult = await createCoin(
+        coinParams,
         walletClient,
         publicClient,
-      });
+      );
       console.log("Coin created:", coinResult);
 
       setOperationStatus("confirming");
