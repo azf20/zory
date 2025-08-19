@@ -14,6 +14,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL;
   const { address } = await params;
+  const destinationUrl = `${URL}/profile/${address}`;
   const fallbackTitle = `Zory by ${address.slice(0, 6)}...${address.slice(-4)}`;
   const fallbackImage = process.env.NEXT_PUBLIC_APP_OG_IMAGE || "/zory.png";
   const platformReferrer = process.env.NEXT_PUBLIC_PLATFORM_REFERRER;
@@ -108,6 +109,24 @@ export async function generateMetadata({
         title,
         description,
         images: [imageUrl],
+      },
+      other: {
+        "fc:miniapp": JSON.stringify({
+          version: "next",
+          imageUrl,
+          button: {
+            title: "View Zory",
+            action: {
+              type: "launch_frame",
+              name: "Zory",
+              url: destinationUrl,
+              splashImageUrl:
+                process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || "/zory.png",
+              splashBackgroundColor:
+                process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "#000000",
+            },
+          },
+        }),
       },
     };
   } catch {

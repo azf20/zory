@@ -9,6 +9,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL;
   const { coinAddress } = await params;
+  const destinationUrl = `${URL}/zory/${coinAddress}`;
   const fallbackTitle = `Zory`;
   const fallbackImage = process.env.NEXT_PUBLIC_APP_OG_IMAGE || "/zory.png";
 
@@ -47,6 +48,24 @@ export async function generateMetadata({
       title,
       description,
       images: [imageUrl],
+    },
+    other: {
+      "fc:miniapp": JSON.stringify({
+        version: "next",
+        imageUrl,
+        button: {
+          title: "View Zory",
+          action: {
+            type: "launch_frame",
+            name: "Zory",
+            url: destinationUrl,
+            splashImageUrl:
+              process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || "/zory.png",
+            splashBackgroundColor:
+              process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "#000000",
+          },
+        },
+      }),
     },
   };
 }
