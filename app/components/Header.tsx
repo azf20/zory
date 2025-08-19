@@ -94,7 +94,7 @@ export function Header() {
                     {createdZories.slice(0, zoryLimit).map((zory) => (
                       <Link
                         key={zory.coinAddress}
-                        href={`/view/${zory.callerAddress}`}
+                        href={`/zory/${zory.coinAddress}`}
                         className="group relative"
                         title={`View ${zory.callerAddress.slice(0, 6)}...${zory.callerAddress.slice(-4)}'s Zory`}
                       >

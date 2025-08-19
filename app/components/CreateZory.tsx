@@ -213,7 +213,7 @@ export default function CreateZory({
         startingMarketCap: CreateConstants.StartingMarketCaps.LOW,
         platformReferrer: process.env
           .NEXT_PUBLIC_PLATFORM_REFERRER as `0x${string}`,
-        currency: CreateConstants.ContentCoinCurrencies.ZORA,
+        currency: CreateConstants.ContentCoinCurrencies.CREATOR_COIN_OR_ZORA,
         chainId: base.id,
       };
       const coinResult = await createCoin({
