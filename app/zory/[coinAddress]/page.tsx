@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import ViewZory from "@/app/components/ViewZory";
-import { useUserCoin } from "@/lib/hooks/useUserCoin";
+import { useCoin } from "@/lib/hooks/useCoin";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
 
@@ -12,7 +12,7 @@ export default function ViewAddressPage() {
   const account = useAccount();
   const router = useRouter();
 
-  const { data: userCoinData, isLoading: isLoadingUserCoin } = useUserCoin({
+  const { data: userCoinData, isLoading: isLoadingUserCoin } = useCoin({
     coinAddress: coinAddress as `0x${string}`,
   });
 

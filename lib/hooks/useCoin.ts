@@ -31,7 +31,7 @@ const coinABI = [
   },
 ] as const;
 
-export interface UserCoinData {
+export interface CoinData {
   coinAddress: string;
   metadataUri: string;
   metadata?: {
@@ -62,19 +62,19 @@ export interface UserCoinData {
   coin?: GetCoinResponse["zora20Token"];
 }
 
-type UseUserCoinParams = {
+type UseCoinParams = {
   address?: string;
   coinAddress?: `0x${string}`; // pre-fetched coin address
   tokenURI?: string; // pre-fetched tokenURI
-  metadata?: UserCoinData["metadata"]; // pre-fetched metadata JSON
+  metadata?: CoinData["metadata"]; // pre-fetched metadata JSON
 };
 
-export function useUserCoin({
+export function useCoin({
   address,
   coinAddress: coinAddressInput,
   tokenURI: tokenURIInput,
   metadata: metadataInput,
-}: UseUserCoinParams) {
+}: UseCoinParams) {
   // Resolve coin address preference: input > token supply fallback
   const tokenSupplyQuery = useQuery({
     queryKey: ["tokenSupply", address],
@@ -195,13 +195,13 @@ export function useUserCoin({
     zoraDataQuery.error;
 
   // Construct the final data object
-  let data: UserCoinData | null = null;
+  let data: CoinData | null = null;
 
   if (coinAddress) {
     const effectiveTokenURI = (tokenURI || "") as string;
     const effectiveMetadata = (metadataInput ||
       metadataQuery.data ||
-      undefined) as UserCoinData["metadata"] | undefined;
+      undefined) as CoinData["metadata"] | undefined;
 
     data = {
       coinAddress,

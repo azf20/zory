@@ -20,7 +20,7 @@ import {
   ValidMetadataURI,
 } from "@zoralabs/coins-sdk";
 import { useEnsNameMainnet } from "@/lib/hooks/useEnsName";
-import { UserCoinData } from "@/lib/hooks/useUserCoin";
+import { CoinData } from "@/lib/hooks/useCoin";
 import CameraCapture from "./CameraCapture";
 import Image from "next/image";
 import { ConnectKitButton } from "connectkit";
@@ -34,7 +34,7 @@ interface CreateZoryProps {
     coinAddress?: `0x${string}`;
     metadata: Record<string, unknown> | null;
   }) => void; // Called when coin is created/updated
-  userCoinData: UserCoinData | null;
+  userCoinData: CoinData | null;
 }
 
 type OperationStatus =

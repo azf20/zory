@@ -7,7 +7,7 @@ import {
   ValidMetadataURI,
 } from "@zoralabs/coins-sdk";
 import { zorbImageDataURI } from "@zoralabs/zorb";
-import { UserCoinData } from "@/lib/hooks/useUserCoin";
+import { CoinData } from "@/lib/hooks/useCoin";
 import Image from "next/image";
 import {
   CurrencyDollarIcon,
@@ -18,7 +18,7 @@ import {
 interface ViewZoryProps {
   onCreateClick?: () => void; // If provided, show create button
   address?: string; // Optional address to use for zorb icon
-  userCoinData: UserCoinData | null;
+  userCoinData: CoinData | null;
   isLoadingUserCoin: boolean;
   showMarketData?: boolean; // Optional: show market data overlay
 }

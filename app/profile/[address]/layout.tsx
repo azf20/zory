@@ -5,7 +5,7 @@ import { base } from "viem/chains";
 import type {
   IndexSupplyQueryResult,
   IndexSupplyCoinRow,
-} from "@/lib/hooks/useUserCoin";
+} from "@/lib/hooks/useCoin";
 
 export async function generateMetadata({
   params,

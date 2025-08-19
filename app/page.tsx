@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import ViewZory from "./components/ViewZory";
 import CreateZory from "./components/CreateZory";
 import { useAccount } from "wagmi";
-import { useUserCoin, UserCoinData } from "@/lib/hooks/useUserCoin";
+import { useCoin, CoinData } from "@/lib/hooks/useCoin";
 import { useFarcaster } from "@/lib/hooks/useFarcaster";
 import { ZoryCameraLogo } from "./components/ZoryCameraLogo";
 
@@ -19,7 +19,7 @@ function ZoryContent() {
     undefined,
   );
   const [metadataOverride, setMetadataOverride] = useState<
-    UserCoinData["metadata"] | undefined
+    CoinData["metadata"] | undefined
   >(undefined);
   const [showIntroModal, setShowIntroModal] = useState(false);
 
@@ -60,7 +60,7 @@ function ZoryContent() {
   };
 
   // Lift coin data fetching to the page for shared state
-  const { data: userCoinData, isLoading: isLoadingUserCoin } = useUserCoin({
+  const { data: userCoinData, isLoading: isLoadingUserCoin } = useCoin({
     address,
     coinAddress: coinAddressOverride,
     tokenURI: tokenURIOverride,
@@ -85,7 +85,7 @@ function ZoryContent() {
     if (payload.tokenURI) setTokenURIOverride(payload.tokenURI);
     if (payload.coinAddress) setCoinAddressOverride(payload.coinAddress);
     if (payload.metadata) {
-      setMetadataOverride(payload.metadata as UserCoinData["metadata"]);
+      setMetadataOverride(payload.metadata as CoinData["metadata"]);
     }
     setIsCreating(false);
   };
