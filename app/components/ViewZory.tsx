@@ -241,7 +241,10 @@ export default function ViewZory({
           title="View on Zora"
         >
           <Image
-            src={zorbImageDataURI(address as `0x${string}`)}
+            src={zorbImageDataURI(
+              (userCoinData.coin?.creatorAddress as `0x${string}`) ||
+                (address as `0x${string}`),
+            )}
             alt="Zora"
             width={16}
             height={16}

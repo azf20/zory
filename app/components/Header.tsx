@@ -14,12 +14,14 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { useFarcaster } from "@/lib/hooks/useFarcaster";
 
 export function Header() {
   const { address } = useAccount();
   const { data: createdZories, isLoading } = useCreatedZories();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const zoryLimit = 10;
+  const { isMiniApp, isAdded, addMiniApp } = useFarcaster();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
@@ -136,6 +138,19 @@ export function Header() {
               >
                 My Zory
               </Link>
+
+              {/* Add Mini App (Farcaster) */}
+              {isMiniApp && !isAdded && (
+                <button
+                  onClick={() => {
+                    addMiniApp();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center text-white/70 hover:text-white underline"
+                >
+                  Add Mini App
+                </button>
+              )}
 
               {/* Recent Zories */}
               {!isLoading && createdZories && createdZories.length > 0 && (

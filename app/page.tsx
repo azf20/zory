@@ -23,7 +23,7 @@ function ZoryContent() {
   >(undefined);
   const [showIntroModal, setShowIntroModal] = useState(false);
 
-  const { isMiniApp, addMiniApp } = useFarcaster();
+  const { isMiniApp, isAdded, addMiniApp } = useFarcaster();
 
   const { address } = useAccount();
 
@@ -133,7 +133,7 @@ function ZoryContent() {
               >
                 Get started
               </button>
-              {isMiniApp && (
+              {isMiniApp && !isAdded && (
                 <button
                   onClick={addMiniApp}
                   className="text-white/70 hover:text-white underline"
