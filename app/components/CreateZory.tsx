@@ -24,6 +24,7 @@ import { CoinData } from "@/lib/hooks/useCoin";
 import CameraCapture from "./CameraCapture";
 import Image from "next/image";
 import { ConnectKitButton } from "connectkit";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 interface CreateZoryProps {
   onBackClick: () => void;
@@ -345,15 +346,6 @@ export default function CreateZory({
       balance && requiredBalance > 0 && balance.value < requiredBalance,
     );
 
-    if (hasInsufficientBalance) {
-      return {
-        text: "Insufficient balance",
-        disabled: true,
-        action: null,
-        className: BUTTON_STYLES.danger,
-      };
-    }
-
     if (operationStatus === "uploading") {
       return {
         text: "Uploading...",
@@ -395,6 +387,9 @@ export default function CreateZory({
       disabled: false,
       action: userCoinData ? handleUpdateZory : handleCreateZory,
       className: BUTTON_STYLES.primary,
+      warning: hasInsufficientBalance
+        ? "Balance may be insufficient"
+        : undefined,
     };
   }, [
     isBase,
@@ -531,6 +526,12 @@ export default function CreateZory({
               </button>
             )}
           </div>
+          {getButtonState().warning && (
+            <div className="text-yellow-500 text-sm flex justify-center gap-2 m-2">
+              <ExclamationTriangleIcon className="w-4 h-4 inline" />
+              {getButtonState().warning}
+            </div>
+          )}
         </div>
       </div>
     );
