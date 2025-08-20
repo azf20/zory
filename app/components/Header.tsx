@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAccount } from "wagmi";
 import { ConnectKitButton } from "connectkit";
 import { ZoryCameraLogo } from "./ZoryCameraLogo";

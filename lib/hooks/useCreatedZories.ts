@@ -63,6 +63,7 @@ export function useCreatedZories({
       const addressMap = new Map<string, any[]>();
 
       // Keep only the first occurrence of each address (most recent due to ORDER BY block_num DESC)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       coinsResult.forEach((row: any[]) => {
         const coinAddress = row[0];
         if (!addressMap.has(coinAddress)) {
@@ -71,6 +72,7 @@ export function useCreatedZories({
       });
 
       const allZories: CreatedZory[] = Array.from(addressMap.values()).map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (row: any[]) => ({
           coinAddress: row[0], // coin address
           uri: row[1], // uri
