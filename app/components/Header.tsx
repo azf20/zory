@@ -140,6 +140,13 @@ export default function Header() {
                 <InformationCircleIcon className="w-6 h-6" />
               </HeaderButton>
 
+              {/* Mobile: Explore Button */}
+              <div className="md:hidden">
+                <HeaderButton href="/explore" title="Explore Zories">
+                  <MagnifyingGlassIcon className="w-5 h-5" />
+                </HeaderButton>
+              </div>
+
               {/* Mobile: Burger Menu Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
