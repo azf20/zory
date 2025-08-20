@@ -14,6 +14,10 @@ const nextConfig = {
         hostname: "magic.decentralized-content.com",
         pathname: "/ipfs/**",
       },
+      {
+        protocol: "https",
+        hostname: "scontent-iad4-1.choicecdn.com",
+      },
     ],
   },
 };

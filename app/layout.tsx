@@ -2,7 +2,7 @@ import "./theme.css";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Header } from "./components/Header";
+import Header from "./components/Header";
 import { Footer } from "./components/Footer";
 import { MiniKitInitializer } from "./components/MiniKitInitializer";
 import { Analytics } from "@vercel/analytics/next";
