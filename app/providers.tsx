@@ -14,7 +14,7 @@ const config = createConfig(
     chains: [base],
     transports: {
       // RPC URL for each chain
-      [base.id]: http(),
+      [base.id]: http(process.env.NEXT_PUBLIC_ALCHEMY_BASE_RPC || undefined),
     },
 
     // Required API Keys
