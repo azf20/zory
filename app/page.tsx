@@ -6,7 +6,6 @@ import ViewZory from "./components/ViewZory";
 import CreateZory from "./components/CreateZory";
 import { useAccount } from "wagmi";
 import { useCoin, CoinData } from "@/lib/hooks/useCoin";
-import { useFarcaster } from "@/lib/hooks/useFarcaster";
 
 function ZoryContent() {
   const searchParams = useSearchParams();
@@ -20,7 +19,6 @@ function ZoryContent() {
   const [metadataOverride, setMetadataOverride] = useState<
     CoinData["metadata"] | undefined
   >(undefined);
-  const { isMiniApp, isAdded, addMiniApp } = useFarcaster();
 
   const { address } = useAccount();
 
