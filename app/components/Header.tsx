@@ -103,7 +103,7 @@ export default function Header() {
   const createdZories = createdZoriesData?.zories || [];
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const zoryLimit = 10;
-  const { isMiniApp, isAdded, addMiniApp } = useFarcaster();
+  const { isMiniApp, isAdded, isBaseApp, addMiniApp } = useFarcaster();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
@@ -214,7 +214,7 @@ export default function Header() {
               </Link>
 
               {/* Add Mini App (Farcaster) */}
-              {isMiniApp && !isAdded && (
+              {isMiniApp && !isAdded && !isBaseApp && (
                 <button
                   onClick={() => {
                     addMiniApp();
